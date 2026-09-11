@@ -219,5 +219,16 @@ func runLogin(cfg config.Config, log *slog.Logger) {
 		masked = masked[:20] + "..." + masked[len(masked)-6:]
 	}
 	log.Info("LOGIN OK", "bearer_masked", masked, "bearer_len", len(bearer))
+
+	// Danzi: PJE_LOGIN_OUT grava o bearer completo num arquivo 0600 para o
+	// consumidor local (mcp-pje) ler e apagar. Sem a variavel, o comportamento
+	// original (so a confirmacao mascarada) e mantido; o bearer nunca vai ao log.
+	if out := os.Getenv("PJE_LOGIN_OUT"); out != "" {
+		if err := os.WriteFile(out, []byte(bearer), 0o600); err != nil {
+			log.Error("falha ao gravar PJE_LOGIN_OUT", "path", out, "err", err)
+			os.Exit(1)
+		}
+		log.Info("bearer gravado", "path", out)
+	}
 	fmt.Printf("LOGIN_OK bearer_len=%d\n", len(bearer))
 }
