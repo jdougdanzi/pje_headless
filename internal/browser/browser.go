@@ -411,6 +411,14 @@ func (b *Browser) awaitAuthenticated(sess *session) error {
 			return err
 		}
 	}
+	// Danzi: ao estourar o prazo, registrar o que a pagina do SSO esta mostrando
+	// (titulo + inicio do texto), para o operador saber em que etapa parou.
+	// Nunca inclui valores de campos; e um recorte do texto visivel.
+	var titulo, texto string
+	_ = chromedp.Run(sess.active(), chromedp.Evaluate(`document.title`, &titulo))
+	_ = chromedp.Run(sess.active(), chromedp.Evaluate(
+		`(document.body && document.body.innerText || "").replace(/\s+/g, " ").slice(0, 600)`, &texto))
+	b.log.Error("SSO nao redirecionou; pagina atual", "title", titulo, "text", texto, "url", sess.url())
 	return errors.New("browser: timed out waiting for SSO redirect / 2FA completion")
 }
 
