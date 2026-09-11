@@ -20,3 +20,4 @@ docs/
 
 # Runner de validacao local (contem caminhos do host do token; nao publicar)
 /run-local-login.sh
+.DS_Store
